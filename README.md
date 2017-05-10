@@ -86,5 +86,6 @@ gauth({
 
 ### Version history
 
+* 1.1.1 - Prompt for Google account to enable account change
 * 1.1.0 - ACL by individual email
 * 1.0.0 - ACL by domains

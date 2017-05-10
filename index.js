@@ -38,29 +38,34 @@ module.exports = function expressGAuth(options) {
       if (!req.session.returnTo) {
         req.session.returnTo = req.originalUrl
       }
-      passport.authenticate('google', {scope: ['profile', 'email']}, function(err, user, info) {
-        if (err) {
-          config.logger.error('GAuth error', err)
-          config.errorPassportAuth(req, res, next, err)
-        } else if (!user) {
-          config.logger.log('GAuth no user', info)
-          config.errorNoUser(req, res, next)
-        } else if (allowedUser(user, config)) {
-          req.logIn(user, function(err) {
-            if (err) {
-              config.logger.error('Login error', err)
-              config.errorLogin(req, res, next, err)
-            } else {
-              const redirect = req.session.returnTo
-              delete req.session.returnTo
-              res.redirect(redirect)
-            }
-          })
-        } else {
-          config.logger.log('User not valid', user.displayName, user.emails)
-          config.unauthorizedUser(req, res, next, user)
-        }
-      })(req, res, next)
+      passport.authenticate('google',
+        {
+          scope: ['profile', 'email'],
+          prompt: 'select_account'
+        },
+        function passportAuthCb(err, user, info) {
+          if (err) {
+            config.logger.error('GAuth error', err)
+            config.errorPassportAuth(req, res, next, err)
+          } else if (!user) {
+            config.logger.log('GAuth no user', info)
+            config.errorNoUser(req, res, next)
+          } else if (allowedUser(user, config)) {
+            req.logIn(user, function(err) {
+              if (err) {
+                config.logger.error('Login error', err)
+                config.errorLogin(req, res, next, err)
+              } else {
+                const redirect = req.session.returnTo
+                delete req.session.returnTo
+                res.redirect(redirect)
+              }
+            })
+          } else {
+            config.logger.log('User not valid', user.displayName, user.emails)
+            config.unauthorizedUser(req, res, next, user)
+          }
+        })(req, res, next)
     }
   })
 }
