@@ -5,6 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy
 module.exports = function expressGAuth(options) {
   const defaults = {
     allowedDomains: [],
+    allowedEmails: [],
     publicEndPoints: [],
     logger: console,
     unauthorizedUser: (req, res, next, user) => res.send(`<h1>Login error, user not valid!</h1><h2>${user.displayName} ${JSON.stringify(user.emails)}</h2>`),
@@ -66,10 +67,12 @@ module.exports = function expressGAuth(options) {
 
 function allowedUser(user, config) {
   if (user.emails) {
-    const userDomains = user.emails.map(function(email) {
-      return email.value && email.value.includes('@') ? email.value.split('@')[1] : null
+    const userEmails = user.emails.map(email => email.value)
+    const userDomains = userEmails.map(email => {
+      return email && email.includes('@') ? email.split('@')[1] : null
     })
     return _.intersection(userDomains, config.allowedDomains).length > 0
+      || _.intersection(userEmails, config.allowedEmails).length > 0
   } else {
     return false
   }

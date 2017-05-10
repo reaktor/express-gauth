@@ -63,7 +63,8 @@ gauth({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   clientDomain: 'http://localhost:5555',
   allowedDomains: ['reaktor.fi', 'reaktor.com'], // User needs to login with Google and email with these domains.
-  publicEndPoints: ['/logout'], // These end points do not require any authentication
+  allowedEmails: ['john@example.com', 'jussi@example.com'], // These users are allowed login through Google auth.
+  publicEndPoints: ['/logout'], // These end points do not require any authentication.
   clientExpressApp: app,
   unauthorizedUser: (req, res, next, user) => res.send(`<h1>Sorry ${user.displayName}, you has no access!</h1>`),
   errorPassportAuth: (req, res, next, err) => res.send('<h1>Error logging in!</h1>'),
@@ -85,4 +86,5 @@ gauth({
 
 ### Version history
 
+* 1.1.0 - ACL by individual email
 * 1.0.0 - ACL by domains
