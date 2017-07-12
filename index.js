@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 
@@ -76,8 +75,8 @@ function allowedUser(user, config) {
     const userDomains = userEmails.map(email => {
       return email && email.includes('@') ? email.split('@')[1] : null
     })
-    return _.intersection(userDomains, config.allowedDomains).length > 0
-      || _.intersection(userEmails, config.allowedEmails).length > 0
+    return config.allowedDomains.some(d => userDomains.includes(d))
+      || config.allowedEmails.some(e => userEmails.includes(e))
   } else {
     return false
   }
