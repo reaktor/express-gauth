@@ -13,7 +13,6 @@
   },
   "homepage": "https://github.com/reaktor/express-gauth#readme",
   "dependencies": {
-    "lodash": "4.17.4",
     "passport": "0.3.2",
     "passport-google-oauth20": "1.0.0"
   },
