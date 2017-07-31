@@ -73,7 +73,7 @@ function allowedUser(user, config) {
   if (user.emails) {
     const userEmails = user.emails.map(email => email.value)
     const userDomains = userEmails.map(email => {
-      return email && email.includes('@') ? email.split('@')[1] : null
+      return email && email.includes('@') ? email.split('@').slice(-1)[0] : null
     })
     return config.allowedDomains.some(d => userDomains.includes(d))
       || config.allowedEmails.some(e => userEmails.includes(e))

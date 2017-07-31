@@ -86,6 +86,7 @@ gauth({
 
 ### Version history
 
+* 1.1.3 - Fix domain parsing when emnail has multiple @ characters
 * 1.1.2 - Remove lodash dependency
 * 1.1.1 - Prompt for Google account to enable account change
 * 1.1.0 - ACL by individual email
