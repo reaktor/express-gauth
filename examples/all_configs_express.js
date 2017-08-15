@@ -3,16 +3,8 @@ const session = require('express-session')
 const gauth = require('../index.js')
 const app = express()
 const logoutEndPoint = '/logout'
-
-// Session must be initialized first
-app.use(session({
-  secret: 'lol',
-  resave: false,
-  saveUninitialized: true
-}))
-
-// Then initialize Google auth. You need your Google app id and secret.
-gauth({
+// Initialize Google auth. You need your Google app id and secret.
+const myGauth = gauth({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   clientDomain: 'http://localhost:5555',
@@ -35,6 +27,16 @@ gauth({
     }
   }
 })
+
+// Session must be initialized first
+app.use(session({
+  secret: 'lol',
+  resave: false,
+  saveUninitialized: true
+}))
+
+// Use your configured gauth middleware
+app.use(myGauth)
 
 app.get(logoutEndPoint, function(req, res) {
   req.logout()

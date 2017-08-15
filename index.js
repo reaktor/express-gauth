@@ -1,7 +1,6 @@
-const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
-
 module.exports = function expressGAuth(options) {
+  const passport = require('passport')
+  const GoogleStrategy = require('passport-google-oauth20').Strategy
   const defaults = {
     allowedDomains: [],
     allowedEmails: [],
@@ -15,7 +14,6 @@ module.exports = function expressGAuth(options) {
     deserializeUser: (user, done) => done(null, user)
   }
   const config = Object.assign(defaults, options)
-  const app = config.clientExpressApp
 
   passport.use(new GoogleStrategy({
       clientID: config.clientID,
@@ -28,45 +26,52 @@ module.exports = function expressGAuth(options) {
   passport.serializeUser(config.serializeUser)
   passport.deserializeUser(config.deserializeUser)
 
-  app.use(passport.initialize())
-  app.use(passport.session())
-  app.use(function expressGAuthMiddleware(req, res, next) {
-    if (req.user || config.publicEndPoints.includes(req.originalUrl)) {
-      next()
-    } else {
-      if (!req.session.returnTo) {
-        req.session.returnTo = req.originalUrl
-      }
-      passport.authenticate('google',
-        {
-          scope: ['profile', 'email'],
-          prompt: 'select_account'
-        },
-        function passportAuthCb(err, user, info) {
+  const passportInitialize = passport.initialize()
+  const passportSession = passport.session()
+  return function expressGAuthMiddleware(req, res, next) {
+    passportInitialize(req, res, err => {
+      if (err) {
+        next(err)
+      } else {
+        passportSession(req, res, err => {
           if (err) {
-            config.logger.error('GAuth error', err)
-            config.errorPassportAuth(req, res, next, err)
-          } else if (!user) {
-            config.logger.log('GAuth no user', info)
-            config.errorNoUser(req, res, next)
-          } else if (allowedUser(user, config)) {
-            req.logIn(user, function(err) {
-              if (err) {
-                config.logger.error('Login error', err)
-                config.errorLogin(req, res, next, err)
-              } else {
-                const redirect = req.session.returnTo
-                delete req.session.returnTo
-                res.redirect(redirect)
-              }
-            })
+            next(err)
           } else {
-            config.logger.log('User not valid', user.displayName, user.emails)
-            config.unauthorizedUser(req, res, next, user)
+            if (req.user || config.publicEndPoints.includes(req.originalUrl)) {
+              next()
+            } else {
+              passport.authenticate('google',
+                {
+                  scope: ['profile', 'email'],
+                  prompt: 'select_account'
+                },
+                function passportAuthCb(err, user, info) {
+                  if (err) {
+                    config.logger.error('GAuth error', err)
+                    config.errorPassportAuth(req, res, next, err)
+                  } else if (!user) {
+                    config.logger.log('GAuth no user', info)
+                    config.errorNoUser(req, res, next)
+                  } else if (allowedUser(user, config)) {
+                    req.logIn(user, function(err) {
+                      if (err) {
+                        config.logger.error('Login error', err)
+                        config.errorLogin(req, res, next, err)
+                      } else {
+                        res.redirect(req.session.returnTo ? req.session.returnTo : '/')
+                      }
+                    })
+                  } else {
+                    config.logger.log('User not valid', user.displayName, user.emails)
+                    config.unauthorizedUser(req, res, next, user)
+                  }
+                })(req, res, next)
+            }
           }
-        })(req, res, next)
-    }
-  })
+        })
+      }
+    })
+  }
 }
 
 function allowedUser(user, config) {
