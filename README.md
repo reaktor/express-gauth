@@ -1,5 +1,7 @@
 ## Google OAuth 2 with access control for Node Express app
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/pihvi/express-gauth.svg)](https://greenkeeper.io/)
+
 ### Installation
 
 This is a [Node.js](https://nodejs.org/en/) module available through the
