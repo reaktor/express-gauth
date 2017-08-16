@@ -19,7 +19,7 @@ $ npm install --save @reaktor/express-gauth
 ``` javascript
 const express = require('express')
 const session = require('express-session')
-const gauth = require('../index.js')
+const gauth = require('@reaktor/express-gauth')
 const app = express()
 const allowedLoginFromDomains = ['reaktor.fi', 'reaktor.com']
 // Initialize Google auth middleware. You need your Google app id and secret.
