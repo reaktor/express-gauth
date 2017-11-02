@@ -67,6 +67,7 @@ gauth({
   clientDomain: 'http://localhost:5555',
   allowedDomains: ['reaktor.fi', 'reaktor.com'], // User needs to login with Google and email with these domains.
   allowedEmails: ['john@example.com', 'jussi@example.com'], // These users are allowed login through Google auth.
+  authorizationScopes: ['profile', 'email'], // Which authorization scopes the authentication authorizes
   publicEndPoints: ['/logout'], // These end points do not require any authentication.
   clientExpressApp: app,
   unauthorizedUser: (req, res, next, user) => res.send(`<h1>Sorry ${user.displayName}, you has no access!</h1>`),
