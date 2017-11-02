@@ -19,7 +19,8 @@ module.exports = function expressGAuth(options) {
       clientID: config.clientID,
       clientSecret: config.clientSecret,
       callbackURL: config.clientDomain
-    }, function(accessToken, refreshToken, profile, cb) {
+    }, function(accessToken, refreshToken, params, profile, cb) {
+      profile.credentials = params; // inject authorization info (tokens, token type, expires_in) to profile
       cb(null, profile, accessToken, refreshToken)
     }
   ))
