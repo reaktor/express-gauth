@@ -5,6 +5,7 @@ module.exports = function expressGAuth(options) {
     allowedDomains: [],
     allowedEmails: [],
     publicEndPoints: [],
+    authorizationScopes: ['profile', 'email'],
     logger: console,
     unauthorizedUser: (req, res, next, user) => res.send(`<h1>Login error, user not valid!</h1><h2>${user.displayName} ${JSON.stringify(user.emails)}</h2>`),
     errorPassportAuth: (req, res, next, err) => res.send('<h1>Error logging in!</h1>'),
@@ -42,7 +43,7 @@ module.exports = function expressGAuth(options) {
             } else {
               passport.authenticate('google',
                 {
-                  scope: ['profile', 'email'],
+                  scope: config.authorizationScopes,
                   prompt: 'select_account'
                 },
                 function passportAuthCb(err, user, info) {
