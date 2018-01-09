@@ -11,7 +11,11 @@ module.exports = function expressGAuth(options) {
     errorNoUser: (req, res, next) => res.send('<h1>Error logging in, no user!</h1>'),
     errorLogin: (req, res, next, err) => res.send('<h1>Login error!</h1>'),
     serializeUser: (user, done) => done(null, user),
-    deserializeUser: (user, done) => done(null, user)
+    deserializeUser: (user, done) => done(null, user),
+    googleAuthorizationParams: {
+      scope: ['profile', 'email'],
+      prompt: 'select_account'
+    }
   }
   const config = Object.assign(defaults, options)
 
@@ -41,10 +45,7 @@ module.exports = function expressGAuth(options) {
               next()
             } else {
               passport.authenticate('google',
-                {
-                  scope: ['profile', 'email'],
-                  prompt: 'select_account'
-                },
+                config.googleAuthorizationParams,
                 function passportAuthCb(err, user, info) {
                   if (err) {
                     config.logger.error('GAuth error', err)

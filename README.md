@@ -60,6 +60,7 @@ app.listen(5555, function() {
 ``` 
 
 #### All config options
+
 ``` javascript
 gauth({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -82,6 +83,14 @@ gauth({
     error: function() {
       console.log('myerror', new Date, JSON.stringify(arguments))
     }
+  },
+  // Override default authorization params
+  // List of supported params are available in passport-google-oauth2 source
+  // https://github.com/jaredhanson/passport-google-oauth2/blob/master/lib/strategy.js
+  // https://developers.google.com/identity/protocols/OpenIDConnect#authenticationuriparameters
+  googleAuthorizationParams: {
+    scope: ['profile', 'email'],
+    hostedDomain: 'reaktor.fi'
   }
 })
 ``` 
