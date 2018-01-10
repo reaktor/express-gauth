@@ -98,6 +98,7 @@ gauth({
 
 ### Version history
 
+* 2.1.0 - Allow overriding Google OAuth 2.0 authorization params
 * 2.0.1 - Show dependency monitoring badge in NPM page.
 * 2.0.0 - Usage as middleware. Also remove failing automatic redirect logic.
 * 1.1.4 - Add package-lock.json and update deps
