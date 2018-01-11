@@ -47,7 +47,7 @@ module.exports = function expressGAuth(options) {
             } else {
               passport.authenticate('google',
                 config.googleAuthorizationParams,
-                function passportAuthCb(err, user, info) {
+                (err, user, info) => {
                   if (err) {
                     config.logger.error('GAuth error', err)
                     config.errorPassportAuth(req, res, next, err)
@@ -55,7 +55,7 @@ module.exports = function expressGAuth(options) {
                     config.logger.log('GAuth no user', info)
                     config.errorNoUser(req, res, next)
                   } else if (allowedUser(user, config)) {
-                    req.logIn(user, function(err) {
+                    req.logIn(user, (err) => {
                       if (err) {
                         config.logger.error('Login error', err)
                         config.errorLogin(req, res, next, err)
