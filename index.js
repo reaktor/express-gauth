@@ -1,3 +1,5 @@
+
+
 module.exports = function expressGAuth(options) {
   const passport = require('passport')
   const GoogleStrategy = require('passport-google-oauth20').Strategy
@@ -12,6 +14,7 @@ module.exports = function expressGAuth(options) {
     errorLogin: (req, res, next, err) => res.send('<h1>Login error!</h1>'),
     serializeUser: (user, done) => done(null, user),
     deserializeUser: (user, done) => done(null, user),
+    returnToOriginalUrl: false,
     googleAuthorizationParams: {
       scope: ['profile', 'email'],
       prompt: 'select_account'
@@ -44,6 +47,13 @@ module.exports = function expressGAuth(options) {
           } else if (req.user || config.publicEndPoints.includes(req.originalUrl)) {
             next()
           } else {
+            // `code` in query params would mean user was redirected back from
+            // google and we don't want to save that url to returnTo. This is
+            // is an issue because we don't have separate end point for
+            // redirect_uri as callback for oauth2
+            if (config.returnToOriginalUrl && req.query.code == null) {
+              req.session.returnTo = req.originalUrl
+            }
             passport.authenticate('google',
               config.googleAuthorizationParams,
               (err, user, info) => {
@@ -59,7 +69,8 @@ module.exports = function expressGAuth(options) {
                       config.logger.error('Login error', err)
                       config.errorLogin(req, res, next, err)
                     } else {
-                      res.redirect(req.session.returnTo ? req.session.returnTo : '/')
+                      res.redirect(req.session.returnTo || '/')
+                      delete req.session.returnTo
                     }
                   })
                 } else {
