@@ -41,34 +41,32 @@ module.exports = function expressGAuth(options) {
         passportSession(req, res, err => {
           if (err) {
             next(err)
+          } else if (req.user || config.publicEndPoints.includes(req.originalUrl)) {
+            next()
           } else {
-            if (req.user || config.publicEndPoints.includes(req.originalUrl)) {
-              next()
-            } else {
-              passport.authenticate('google',
-                config.googleAuthorizationParams,
-                (err, user, info) => {
-                  if (err) {
-                    config.logger.error('GAuth error', err)
-                    config.errorPassportAuth(req, res, next, err)
-                  } else if (!user) {
-                    config.logger.log('GAuth no user', info)
-                    config.errorNoUser(req, res, next)
-                  } else if (allowedUser(user, config)) {
-                    req.logIn(user, (err) => {
-                      if (err) {
-                        config.logger.error('Login error', err)
-                        config.errorLogin(req, res, next, err)
-                      } else {
-                        res.redirect(req.session.returnTo ? req.session.returnTo : '/')
-                      }
-                    })
-                  } else {
-                    config.logger.log('User not valid', user.displayName, user.emails)
-                    config.unauthorizedUser(req, res, next, user)
-                  }
-                })(req, res, next)
-            }
+            passport.authenticate('google',
+              config.googleAuthorizationParams,
+              (err, user, info) => {
+                if (err) {
+                  config.logger.error('GAuth error', err)
+                  config.errorPassportAuth(req, res, next, err)
+                } else if (!user) {
+                  config.logger.log('GAuth no user', info)
+                  config.errorNoUser(req, res, next)
+                } else if (allowedUser(user, config)) {
+                  req.logIn(user, (err) => {
+                    if (err) {
+                      config.logger.error('Login error', err)
+                      config.errorLogin(req, res, next, err)
+                    } else {
+                      res.redirect(req.session.returnTo ? req.session.returnTo : '/')
+                    }
+                  })
+                } else {
+                  config.logger.log('User not valid', user.displayName, user.emails)
+                  config.unauthorizedUser(req, res, next, user)
+                }
+              })(req, res, next)
           }
         })
       }
