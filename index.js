@@ -20,14 +20,14 @@ module.exports = function expressGAuth(options) {
   const config = Object.assign(defaults, options)
 
   passport.use(new GoogleStrategy({
-      clientID: config.clientID,
-      clientSecret: config.clientSecret,
-      callbackURL: config.clientDomain
-    }, function(accessToken, refreshToken, params, profile, cb) {
-      profile.credentials = params; // inject authorization info (tokens, token type, expires_in) to profile
-      cb(null, profile, accessToken, refreshToken)
-    }
-  ))
+    clientID: config.clientID,
+    clientSecret: config.clientSecret,
+    callbackURL: config.clientDomain
+  }, function(accessToken, refreshToken, params, profile, cb) {
+    profile.credentials = params; // inject authorization info (tokens, token type, expires_in) to profile
+    cb(null, profile, accessToken, refreshToken)
+  }))
+
   passport.serializeUser(config.serializeUser)
   passport.deserializeUser(config.deserializeUser)
 
