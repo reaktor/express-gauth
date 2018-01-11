@@ -91,7 +91,9 @@ gauth({
   googleAuthorizationParams: {
     scope: ['profile', 'email'],
     hostedDomain: 'reaktor.fi'
-  }
+  },
+  // Redirect user to the original url
+  returnToOriginalUrl: false
 })
 ``` 
 [Full example](examples/all_configs_express.js)
