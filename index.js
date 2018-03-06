@@ -1,8 +1,11 @@
-
+const addSeconds = require('date-fns/add_seconds')
 
 module.exports = function expressGAuth(options) {
   const passport = require('passport')
   const GoogleStrategy = require('passport-google-oauth20').Strategy
+  const refresh = require('passport-oauth2-refresh')
+  const isAfter = require('date-fns/is_after')
+
   const defaults = {
     allowedDomains: [],
     allowedEmails: [],
@@ -21,15 +24,22 @@ module.exports = function expressGAuth(options) {
     }
   }
   const config = Object.assign(defaults, options)
-
-  passport.use(new GoogleStrategy({
+  const strategy = new GoogleStrategy({
     clientID: config.clientID,
     clientSecret: config.clientSecret,
     callbackURL: config.clientDomain
   }, function(accessToken, refreshToken, params, profile, cb) {
-    profile.credentials = params; // inject authorization info (tokens, token type, expires_in) to profile
+    if (refreshToken) {
+      profile.refreshToken = refreshToken
+      profile.tokenExpirationTime = addSeconds(Date(), params.expires_in)
+    }
+    profile.credentials = params // inject authorization info (tokens, token type, expires_in) to profile
+
     cb(null, profile, accessToken, refreshToken)
-  }))
+  })
+
+  passport.use(strategy)
+  refresh.use(strategy)
 
   passport.serializeUser(config.serializeUser)
   passport.deserializeUser(config.deserializeUser)
@@ -44,7 +54,18 @@ module.exports = function expressGAuth(options) {
         passportSession(req, res, err => {
           if (err) {
             next(err)
-          } else if (req.user || config.publicEndPoints.includes(req.originalUrl)) {
+          } else if (req.user) {
+            const { tokenExpirationTime, refreshToken } = req.user
+            const now = Date()
+            const isExpired = refreshToken && isAfter(now, tokenExpirationTime)
+
+            if (refreshToken && isExpired) {
+              refresh.requestNewAccessToken('google', refreshToken,
+                updateAccessTokenCallback(req.session, next))
+            } else {
+              next()
+            }
+          } else if (config.publicEndPoints.includes(req.originalUrl)) {
             next()
           } else {
             // `code` in query params would mean user was redirected back from
@@ -82,6 +103,20 @@ module.exports = function expressGAuth(options) {
         })
       }
     })
+  }
+}
+
+function updateAccessTokenCallback(session, next) {
+  return (err, accessToken, refreshToken) => {
+    if (err) {
+      next(err)
+    } else {
+      const user = session.passport.user
+      const expiresInSeconds = user.credentials.expires_in
+      user.credentials.access_token = accessToken
+      user.tokenExpirationTime = addSeconds(Date(), expiresInSeconds)
+      next()
+    }
   }
 }
 
