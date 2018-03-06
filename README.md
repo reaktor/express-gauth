@@ -57,7 +57,27 @@ app.get('/', function(req, res) {
 app.listen(5555, function() {
   console.log('Waiting for Reaktorian Google login at http://localhost:5555')
 })
-``` 
+```
+
+#### Using Access token
+
+[Full example](./examples/access_token.js)
+
+``` javascript
+  const app = express()
+  app.use(session(/* options */))
+  const myGauth = gauth({
+    googleAuthorizationParams: {
+      scope: ['profile', 'email']
+    },
+    // Other gauth options
+  })
+  app.use(myGauth)
+  app.get('/', function(req, res) {
+    const accessToken = req.session.passport.user.credentials.access_token
+    // Access private files with Google API using the access token
+  })
+```
 
 #### All config options
 
@@ -90,12 +110,17 @@ gauth({
   // https://developers.google.com/identity/protocols/OpenIDConnect#authenticationuriparameters
   googleAuthorizationParams: {
     scope: ['profile', 'email'],
-    hostedDomain: 'reaktor.fi'
+    hostedDomain: 'reaktor.fi',
+    // To gain refreshable tokens
+    accessType: 'offline',
+    // This forces Google to send refresh tokens on each session start
+    // By default Google sends refresh token only once per authentication to Google
+    prompt: 'consent',
   },
   // Redirect user to the original url
   returnToOriginalUrl: false
 })
-``` 
+```
 [Full example](examples/all_configs_express.js)
 
 ### Version history
