@@ -29,10 +29,8 @@ module.exports = function expressGAuth(options) {
     clientSecret: config.clientSecret,
     callbackURL: config.clientDomain
   }, function(accessToken, refreshToken, params, profile, cb) {
-    if (refreshToken) {
-      profile.refreshToken = refreshToken
-      profile.tokenExpirationTime = addSeconds(Date(), params.expires_in)
-    }
+    profile.refreshToken = refreshToken
+    profile.tokenExpirationTime = addSeconds(Date(), params.expires_in)
     profile.credentials = params // inject authorization info (tokens, token type, expires_in) to profile
 
     cb(null, profile, accessToken, refreshToken)
@@ -57,9 +55,10 @@ module.exports = function expressGAuth(options) {
           } else if (req.user) {
             const { tokenExpirationTime, refreshToken } = req.user
             const now = Date()
-            const isExpired = refreshToken && isAfter(now, tokenExpirationTime)
+            const isExpired = isAfter(now, tokenExpirationTime)
+            const shouldBeRefreshed = config.googleAuthorizationParams.accessType === 'offline'
 
-            if (refreshToken && isExpired) {
+            if (isExpired && shouldBeRefreshed) {
               refresh.requestNewAccessToken('google', refreshToken,
                 updateAccessTokenCallback(req.session, next))
             } else {
@@ -109,7 +108,8 @@ module.exports = function expressGAuth(options) {
 function updateAccessTokenCallback(session, next) {
   return (err, accessToken, refreshToken) => {
     if (err) {
-      next(err)
+      next({ message: 'Error when attempting to refresh Google Access Token',
+        original_error: err})
     } else {
       const user = session.passport.user
       const expiresInSeconds = user.credentials.expires_in
