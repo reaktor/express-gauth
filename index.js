@@ -1,7 +1,7 @@
 const addSeconds = require('date-fns/add_seconds')
+const passport = require('passport')
 
 module.exports = function expressGAuth(options) {
-  const passport = require('passport')
   const GoogleStrategy = require('passport-google-oauth20').Strategy
   const refresh = require('passport-oauth2-refresh')
   const isAfter = require('date-fns/is_after')
@@ -58,11 +58,25 @@ module.exports = function expressGAuth(options) {
             const { tokenExpirationTime, refreshToken } = req.user
             const now = Date()
             const isExpired = isAfter(now, tokenExpirationTime)
-            const shouldBeRefreshed = config.googleAuthorizationParams.accessType === 'offline'
+            const shouldBeRefreshed = isExpired &&
+              config.googleAuthorizationParams.accessType === 'offline'
 
-            if (isExpired && shouldBeRefreshed) {
+            if (shouldBeRefreshed && refreshToken) {
               refresh.requestNewAccessToken('google', refreshToken,
-                updateAccessTokenCallback(req.session, next))
+              updateAccessTokenCallback(config, req.session, next))
+            } else if (shouldBeRefreshed) {
+              // Access token needs to be updated, but we are missing refresh
+              // token required to do it. Google provides refresh token only
+              // when authorizing the user through consent screen, so we
+              // reauthenticate the user and ask for their consent again in
+              // order to gain refresh token
+              const { googleAuthorizationParams } = config
+              const newGoogleParams = Object.assign(googleAuthorizationParams,
+                { prompt: 'consent' })
+              const newConfig = Object.assign(config,
+                { googleAuthorizationParams: newGoogleParams })
+              req.logOut()
+              authenticate(config, req, res, next)(req, res, next)
             } else {
               next()
             }
@@ -76,30 +90,7 @@ module.exports = function expressGAuth(options) {
             if (config.returnToOriginalUrl && req.query.code == null) {
               req.session.returnTo = req.originalUrl
             }
-            passport.authenticate('google',
-              config.googleAuthorizationParams,
-              (err, user, info) => {
-                if (err) {
-                  config.logger.error('GAuth error', err)
-                  config.errorPassportAuth(req, res, next, err)
-                } else if (!user) {
-                  config.logger.log('GAuth no user', info)
-                  config.errorNoUser(req, res, next)
-                } else if (allowedUser(user, config)) {
-                  req.logIn(user, (err) => {
-                    if (err) {
-                      config.logger.error('Login error', err)
-                      config.errorLogin(req, res, next, err)
-                    } else {
-                      res.redirect(req.session.returnTo || '/')
-                      delete req.session.returnTo
-                    }
-                  })
-                } else {
-                  config.logger.log('User not valid', user.displayName, user.emails)
-                  config.unauthorizedUser(req, res, next, user)
-                }
-              })(req, res, next)
+            authenticate(config, req, res, next)(req, res, next)
           }
         })
       }
@@ -121,6 +112,33 @@ function updateAccessTokenCallback(config, session, next) {
       next()
     }
   }
+}
+
+function authenticate(config, req, res, next) {
+  return passport.authenticate('google',
+    config.googleAuthorizationParams,
+    (err, user, info) => {
+      if (err) {
+        config.logger.error('GAuth error', err)
+        config.errorPassportAuth(req, res, next, err)
+      } else if (!user) {
+        config.logger.log('GAuth no user', info)
+        config.errorNoUser(req, res, next)
+      } else if (allowedUser(user, config)) {
+        req.logIn(user, (err) => {
+          if (err) {
+            config.logger.error('Login error', err)
+            config.errorLogin(req, res, next, err)
+          } else {
+            res.redirect(req.session.returnTo || '/')
+            delete req.session.returnTo
+          }
+        })
+      } else {
+        config.logger.log('User not valid', user.displayName, user.emails)
+        config.unauthorizedUser(req, res, next, user)
+      }
+    })
 }
 
 function calculateExpirationTime(expiresInSeconds, refreshBefore) {

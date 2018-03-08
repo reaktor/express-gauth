@@ -115,7 +115,7 @@ gauth({
     accessType: 'offline',
     // This forces Google to send refresh tokens on each session start
     // By default Google sends refresh token only once per authentication to Google
-    prompt: 'consent',
+    prompt: 'consent'
   },
   // Time in seconds to refresh access token before it expires
   refreshBefore: 10
