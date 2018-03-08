@@ -21,7 +21,8 @@ module.exports = function expressGAuth(options) {
     googleAuthorizationParams: {
       scope: ['profile', 'email'],
       prompt: 'select_account'
-    }
+    },
+    refreshBefore: 10
   }
   const config = Object.assign(defaults, options)
   const strategy = new GoogleStrategy({
@@ -30,7 +31,8 @@ module.exports = function expressGAuth(options) {
     callbackURL: config.clientDomain
   }, function(accessToken, refreshToken, params, profile, cb) {
     profile.refreshToken = refreshToken
-    profile.tokenExpirationTime = addSeconds(Date(), params.expires_in)
+    profile.tokenExpirationTime = calculateExpirationTime(params.expires_in,
+      config.refreshBefore)
     profile.credentials = params // inject authorization info (tokens, token type, expires_in) to profile
 
     cb(null, profile, accessToken, refreshToken)
@@ -105,19 +107,25 @@ module.exports = function expressGAuth(options) {
   }
 }
 
-function updateAccessTokenCallback(session, next) {
+function updateAccessTokenCallback(config, session, next) {
   return (err, accessToken, refreshToken) => {
     if (err) {
+      config.logger.error(err)
       next({ message: 'Error when attempting to refresh Google Access Token',
         original_error: err})
     } else {
       const user = session.passport.user
       const expiresInSeconds = user.credentials.expires_in
       user.credentials.access_token = accessToken
-      user.tokenExpirationTime = addSeconds(Date(), expiresInSeconds)
+      user.tokenExpirationTime = calculateExpirationTime(expiresInSeconds, config.refreshBefore)
       next()
     }
   }
+}
+
+function calculateExpirationTime(expiresInSeconds, refreshBefore) {
+  const refreshAfter = Math.max(expiresInSeconds - refreshBefore, 0)
+  return addSeconds(Date(), refreshAfter)
 }
 
 function allowedUser(user, config) {

@@ -16,7 +16,9 @@ const myGauth = gauth({
     // This forces Google to send refresh tokens on each session start
     // By default Google sends refresh token only once per authentication to Google
     prompt: 'consent',
-  }
+  },
+  // Refresh access token 10 seconds before the expiration time
+  refreshBefore: 10
 })
 
 // Session must be initialized first

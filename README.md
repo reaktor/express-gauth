@@ -117,6 +117,8 @@ gauth({
     // By default Google sends refresh token only once per authentication to Google
     prompt: 'consent',
   },
+  // Time in seconds to refresh access token before it expires
+  refreshBefore: 10
   // Redirect user to the original url
   returnToOriginalUrl: false
 })
