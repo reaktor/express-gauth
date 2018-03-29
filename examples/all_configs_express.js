@@ -25,7 +25,20 @@ const myGauth = gauth({
     error: function() {
       console.log('myerror', new Date, JSON.stringify(arguments))
     }
-  }
+  },
+  // Override default authorization params
+  // List of supported params are available in passport-google-oauth2 source
+  // https://github.com/jaredhanson/passport-google-oauth2/blob/master/lib/strategy.js
+  // https://developers.google.com/identity/protocols/OpenIDConnect#authenticationuriparameters
+  googleAuthorizationParams: {
+    scope: ['profile', 'email'],
+    hostedDomain: 'reaktor.fi'
+  },
+  // Redirect user to the original url
+  returnToOriginalUrl: false,
+  // originalUrl will be set as the return url only if returnToOriginalUrl is true,
+  // and the originalUrl passes this predicate
+  isReturnUrlAllowed: url => /\.(css|jpe?g|gif|ico|js|json|png|svg|woff2?)$/i.test(url) === false,
 })
 
 // Session must be initialized first
