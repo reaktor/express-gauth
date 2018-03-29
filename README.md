@@ -120,7 +120,10 @@ gauth({
   // Time in seconds to refresh access token before it expires
   refreshBefore: 10
   // Redirect user to the original url
-  returnToOriginalUrl: false
+  returnToOriginalUrl: false,
+  // originalUrl will be set as the return url only if returnToOriginalUrl is true,
+  // and the originalUrl passes this predicate
+  isReturnUrlAllowed: url => /\.(css|jpe?g|gif|ico|js|json|png|svg|woff2?)$/i.test(url) === false,
 })
 ```
 [Full example](examples/all_configs_express.js)

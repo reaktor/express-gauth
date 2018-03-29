@@ -1,5 +1,6 @@
 const addSeconds = require('date-fns/add_seconds')
 const passport = require('passport')
+const url = require("url")
 
 module.exports = function expressGAuth(options) {
   const GoogleStrategy = require('passport-google-oauth20').Strategy
@@ -18,6 +19,7 @@ module.exports = function expressGAuth(options) {
     serializeUser: (user, done) => done(null, user),
     deserializeUser: (user, done) => done(null, user),
     returnToOriginalUrl: false,
+    isReturnUrlAllowed: url => /\.(css|jpe?g|gif|ico|js|json|png|svg|woff2?)$/i.test(url) === false,
     googleAuthorizationParams: {
       scope: ['profile', 'email'],
       prompt: 'select_account'
@@ -94,7 +96,7 @@ module.exports = function expressGAuth(options) {
             // is an issue because we don't have separate end point for
             // redirect_uri as callback for oauth2
             if (config.returnToOriginalUrl && req.query.code == null) {
-              req.session.returnTo = req.originalUrl
+              saveReturnUrlToSession(req, config.isReturnUrlAllowed)
             }
             authenticate(config, req, res, next)(req, res, next)
           }
@@ -163,4 +165,24 @@ function allowedUser(user, config) {
   } else {
     return false
   }
+}
+
+// Browser might try to fetch assets already before the "main request"
+// reaches our server. We must tell apart these locations from where
+// the user really tries to go. Also, we should set returnTo only once
+// per session.
+function saveReturnUrlToSession(req, isReturnUrlAllowed) {
+  const referrer = req.get("referrer")
+  const isInternalRequest = Boolean(
+    referrer && url.parse(referrer).hostname === req.hostname
+  )
+
+  const isUrlAllowed = isReturnUrlAllowed(req.originalUrl)
+  const isSessionSet = Boolean(req.session && req.session.returnTo)
+
+  if (!isUrlAllowed || isInternalRequest || isSessionSet) {
+    return
+  }
+
+  req.session.returnTo = req.originalUrl
 }
