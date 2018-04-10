@@ -71,12 +71,18 @@ module.exports = function expressGAuth(options) {
               // reauthenticate the user and ask for their consent again in
               // order to gain refresh token
               const { googleAuthorizationParams } = config
-              const newGoogleParams = Object.assign(googleAuthorizationParams,
-                { prompt: 'consent' })
-              const newConfig = Object.assign(config,
-                { googleAuthorizationParams: newGoogleParams })
+              const newGoogleParams = Object.assign(
+                {},
+                googleAuthorizationParams,
+                { prompt: 'consent' }
+              )
+              const newConfig = Object.assign(
+                {},
+                config,
+                { googleAuthorizationParams: newGoogleParams
+              })
               req.logOut()
-              authenticate(config, req, res, next)(req, res, next)
+              authenticate(newConfig, req, res, next)(req, res, next)
             } else {
               next()
             }
