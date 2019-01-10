@@ -30,7 +30,8 @@ module.exports = function expressGAuth(options) {
   const strategy = new GoogleStrategy({
     clientID: config.clientID,
     clientSecret: config.clientSecret,
-    callbackURL: config.clientDomain
+    callbackURL: config.clientDomain,
+    userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
   }, function(accessToken, refreshToken, params, profile, cb) {
     profile.refreshToken = refreshToken
     profile.tokenExpirationTime = calculateExpirationTime(params.expires_in,
