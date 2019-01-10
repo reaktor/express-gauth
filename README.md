@@ -132,7 +132,6 @@ gauth({
 
 * 2.5.0 - Make it possible to disallow return urls when using returnToOriginalUrl
 * 2.4.0 - Use refresh token to refresh expiring access tokens
-* 2.4.0 - Use refresh token to refresh expiring access tokens
 * 2.3.0 - Add option for redirecting user to original url
 * 2.2.0 - Add profile.credentials which contains user's authorization tokens
 * 2.1.0 - Allow overriding Google OAuth 2.0 authorization params
