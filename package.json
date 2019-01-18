@@ -19,8 +19,8 @@
     "passport-oauth2-refresh": "^1.0.0"
   },
   "devDependencies": {
-    "express": "4.15.4",
-    "express-session": "1.15.5"
+    "express": "^4.16.4",
+    "express-session": "^1.15.6"
   },
   "scripts": {
     "test": "echo TODO: tests"
