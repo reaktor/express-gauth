@@ -130,6 +130,7 @@ gauth({
 
 ### Version history
 
+* 3.0.0 - Support Google auth without Plus API. Possibly breaking changes, see [this pull request](https://github.com/reaktor/express-gauth/pull/13).
 * 2.5.0 - Make it possible to disallow return urls when using returnToOriginalUrl
 * 2.4.0 - Use refresh token to refresh expiring access tokens
 * 2.3.0 - Add option for redirecting user to original url
