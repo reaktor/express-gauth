@@ -19,11 +19,11 @@ $ npm install --save @reaktor/express-gauth
 ``` javascript
 const express = require('express')
 const session = require('express-session')
-const gauth = require('@reaktor/express-gauth')
+const { expressGAuth } = require('@reaktor/express-gauth')
 const app = express()
 const allowedLoginFromDomains = ['reaktor.fi', 'reaktor.com']
 // Initialize Google auth middleware. You need your Google app id and secret.
-const myGauth = gauth({
+const myGauth = expressGAuth({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   clientDomain: 'http://localhost:5555',
@@ -66,7 +66,7 @@ app.listen(5555, function() {
 ``` javascript
   const app = express()
   app.use(session(/* options */))
-  const myGauth = gauth({
+  const myGauth = expressGAuth({
     googleAuthorizationParams: {
       scope: ['profile', 'email']
     },
@@ -82,14 +82,13 @@ app.listen(5555, function() {
 #### All config options
 
 ``` javascript
-gauth({
+expressGAuth({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   clientDomain: 'http://localhost:5555',
   allowedDomains: ['reaktor.fi', 'reaktor.com'], // User needs to login with Google and email with these domains.
   allowedEmails: ['john@example.com', 'jussi@example.com'], // These users are allowed login through Google auth.
   publicEndPoints: ['/logout'], // These end points do not require any authentication.
-  clientExpressApp: app,
   unauthorizedUser: (req, res, next, user) => res.send(`<h1>Sorry ${user.displayName}, you has no access!</h1>`),
   errorPassportAuth: (req, res, next, err) => res.send('<h1>Error logging in!</h1>'),
   errorNoUser: (req, res, next) => res.send('<h1>Error logging in, no user details!</h1>'),
@@ -130,6 +129,8 @@ gauth({
 
 ### Version history
 
+* 4.0.1 - Update documentation, fix badly typed logger prop in options
+* 4.0.0 - BREAKING CHANGES: middleware constructor is now exported by name. Typescript typings added
 * 3.0.0 - Support Google auth without Plus API. Possibly breaking changes, see [this pull request](https://github.com/reaktor/express-gauth/pull/13).
 * 2.5.0 - Make it possible to disallow return urls when using returnToOriginalUrl
 * 2.4.0 - Use refresh token to refresh expiring access tokens
