@@ -2,7 +2,7 @@ const addSeconds = require('date-fns/add_seconds')
 const passport = require('passport')
 const url = require("url")
 
-module.exports = function expressGAuth(options) {
+module.exports.expressGAuth = function expressGAuth(options) {
   const GoogleStrategy = require('passport-google-oauth20').Strategy
   const refresh = require('passport-oauth2-refresh')
   const isAfter = require('date-fns/is_after')
