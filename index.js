@@ -158,14 +158,30 @@ function calculateExpirationTime(expiresInSeconds, refreshBefore) {
 function allowedUser(user, config) {
   if (user.emails) {
     const userEmails = user.emails.map(email => email.value)
-    const userDomains = userEmails.map(email => {
-      return email && email.includes('@') ? email.split('@').slice(-1)[0] : null
-    })
-    return config.allowedDomains.some(d => userDomains.includes(d))
+    return isUserFromAllowedDomain(user, config)
       || config.allowedEmails.some(e => userEmails.includes(e))
   } else {
     return false
   }
+}
+
+function isUserFromAllowedDomain(user, config) {
+  const rawGoogleClaims = user['_json']
+
+  if (!rawGoogleClaims) {
+    config.logger.error('Google raw user data missing', err)
+    return false
+  }
+
+  // This is the domain of the user's email address
+  // can differ from the actual suffix of the email address (e.g. ada.lovelace@reaktor.com might not be a reaktor.com domain)
+  const domain = rawGoogleClaims.hd
+
+  if (!domain) {
+    return false
+  }
+
+  return config.allowedDomains.some(allowedDomain => domain === allowedDomain)
 }
 
 // Browser might try to fetch assets already before the "main request"
