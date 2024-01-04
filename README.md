@@ -129,7 +129,7 @@ expressGAuth({
 
 ### Version history
 
-* 4.0.2 - Fix vulnerability in the detection of the domain of the user email (see [this article](https://trufflesecurity.com/blog/google-oauth-is-broken-sort-of/))
+* 5.0.0 - Fix vulnerability in the detection of the domain of the user email (see [this article](https://trufflesecurity.com/blog/google-oauth-is-broken-sort-of/))
 * 4.0.1 - Update documentation, fix badly typed logger prop in options
 * 4.0.0 - BREAKING CHANGES: middleware constructor is now exported by name. Typescript typings added
 * 3.0.0 - Support Google auth without Plus API. Possibly breaking changes, see [this pull request](https://github.com/reaktor/express-gauth/pull/13).
