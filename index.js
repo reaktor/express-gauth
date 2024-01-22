@@ -106,16 +106,17 @@ module.exports.expressGAuth = function expressGAuth(options) {
       }
     })
   }
-}
 
-function isPublicEndpoint(reqOriginalUrl) {
-  if (config.ignoreUrlParamsOfPublicEndPoints) {
-    const [ originalUrlWithoutQueryParams ] = reqOriginalUrl.split('?')
-    return config.publicEndPoints.includes(originalUrlWithoutQueryParams)
-  } else {
-    return config.publicEndPoints.includes(reqOriginalUrl)
+  function isPublicEndpoint(reqOriginalUrl) {
+    if (config.ignoreUrlParamsOfPublicEndPoints) {
+      const [ originalUrlWithoutQueryParams ] = reqOriginalUrl.split('?')
+      return config.publicEndPoints.includes(originalUrlWithoutQueryParams)
+    } else {
+      return config.publicEndPoints.includes(reqOriginalUrl)
+    }
   }
 }
+
 
 function updateAccessTokenCallback(config, session, next) {
   return (err, accessToken, refreshToken) => {
