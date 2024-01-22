@@ -1,6 +1,6 @@
 {
   "name": "@reaktor/express-gauth",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Simplified GAuth login for Express with ACLs",
   "main": "index.js",
   "types": "index.d.ts",
