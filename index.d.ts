@@ -10,6 +10,7 @@ export interface GauthOptions {
   readonly allowedDomains?: ReadonlyArray<string>;
   readonly allowedEmails?: ReadonlyArray<string>;
   readonly publicEndPoints?: ReadonlyArray<string>;
+  readonly ignoreUrlParamsOfPublicEndPoints?: boolean;
   readonly logger?: { log: (...output: any[]) => void, error: (...output: any[]) => void };
   readonly unauthorizedUser?: (req: Request, res: Response, next: NextFunction, user: unknown) => void;
   readonly errorPassportAuth?: (req: Request, res: Response, next: NextFunction, err) => void;
