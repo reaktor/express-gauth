@@ -89,6 +89,7 @@ expressGAuth({
   allowedDomains: ['reaktor.fi', 'reaktor.com'], // User needs to login with Google and email with these domains.
   allowedEmails: ['john@example.com', 'jussi@example.com'], // These users are allowed login through Google auth.
   publicEndPoints: ['/logout'], // These end points do not require any authentication.
+  ignoreUrlParamsOfPublicEndPoints: true, // Before validating url to match one of the publicEndPoints, the url parameters are stripped away
   unauthorizedUser: (req, res, next, user) => res.send(`<h1>Sorry ${user.displayName}, you has no access!</h1>`),
   errorPassportAuth: (req, res, next, err) => res.send('<h1>Error logging in!</h1>'),
   errorNoUser: (req, res, next) => res.send('<h1>Error logging in, no user details!</h1>'),
@@ -129,6 +130,7 @@ expressGAuth({
 
 ### Version history
 
+* 5.1.0 - Add optional stripping of url parameters to the publicEndPoints validation
 * 5.0.0 - Fix vulnerability in the detection of the domain of the user email (see [this article](https://trufflesecurity.com/blog/google-oauth-is-broken-sort-of/))
 * 4.0.1 - Update documentation, fix badly typed logger prop in options
 * 4.0.0 - BREAKING CHANGES: middleware constructor is now exported by name. Typescript typings added

@@ -11,6 +11,7 @@ module.exports.expressGAuth = function expressGAuth(options) {
     allowedDomains: [],
     allowedEmails: [],
     publicEndPoints: [],
+    ignoreUrlParamsOfPublicEndPoints: false,
     logger: console,
     unauthorizedUser: (req, res, next, user) => res.send(`<h1>Login error, user not valid!</h1><h2>${user.displayName} ${JSON.stringify(user.emails)}</h2>`),
     errorPassportAuth: (req, res, next, err) => res.send('<h1>Error logging in!</h1>'),
@@ -89,7 +90,7 @@ module.exports.expressGAuth = function expressGAuth(options) {
             } else {
               next()
             }
-          } else if (config.publicEndPoints.includes(req.originalUrl)) {
+          } else if (isPublicEndpoint(req.originalUrl)) {
             next()
           } else {
             // `code` in query params would mean user was redirected back from
@@ -104,6 +105,15 @@ module.exports.expressGAuth = function expressGAuth(options) {
         })
       }
     })
+  }
+}
+
+function isPublicEndpoint(reqOriginalUrl) {
+  if (config.ignoreUrlParamsOfPublicEndPoints) {
+    const [ originalUrlWithoutQueryParams ] = reqOriginalUrl.split('?')
+    return config.publicEndPoints.includes(originalUrlWithoutQueryParams)
+  } else {
+    return config.publicEndPoints.includes(reqOriginalUrl)
   }
 }
 
