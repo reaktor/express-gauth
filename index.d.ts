@@ -32,5 +32,5 @@ export interface GauthOptions {
 }
 
 export type DoneCallback<T> =
-  | ((err: unknown) => void)
-  | ((err: null, value: T) => void);
+  & ((err: unknown) => void)
+  & ((err: null, value: T) => void);
