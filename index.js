@@ -85,8 +85,12 @@ module.exports.expressGAuth = function expressGAuth(options) {
                 config,
                 { googleAuthorizationParams: newGoogleParams
               })
-              req.logOut()
-              authenticate(newConfig, req, res, next)(req, res, next)
+              req.logOut(err => {
+                if (err) {
+                  return next(err)
+                }
+                authenticate(newConfig, req, res, next)(req, res, next)
+              })
             } else {
               next()
             }
@@ -145,12 +149,14 @@ function authenticate(config, req, res, next) {
         config.logger.log('GAuth no user', info)
         config.errorNoUser(req, res, next)
       } else if (allowedUser(user, config)) {
+        // Passport regenerates the session during login.
+        const returnTo = req.session.returnTo
         req.logIn(user, (err) => {
           if (err) {
             config.logger.error('Login error', err)
             config.errorLogin(req, res, next, err)
           } else {
-            res.redirect(req.session.returnTo || '/')
+            res.redirect(returnTo || '/')
             delete req.session.returnTo
           }
         })

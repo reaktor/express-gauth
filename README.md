@@ -128,6 +128,12 @@ expressGAuth({
 ```
 [Full example](examples/all_configs_express.js)
 
+### Tests
+
+Run `npm test` with Node.js 22 or newer. The tests use Node's built-in test
+runner and exercise Express, Passport, and sessions locally. Google HTTP
+responses are stubbed, so no Google credentials or internet access are needed.
+
 ### Version history
 
 * 5.1.0 - Add optional stripping of url parameters to the publicEndPoints validation
